@@ -42,7 +42,7 @@ Create default vpc if required
 
 ### Configure `Redshift to access Kinesis`
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > Try to understand `trust-policy.json` file. Here, we are attaching this role to `Redshift`. so that, only `Redshift` can assume this role.
 
 ```bash
