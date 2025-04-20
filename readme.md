@@ -1,11 +1,11 @@
 # Real-Time Ecommerce Analytics using `AWS Redshift` and `AWS Kinesis Data Stream`
 
-> **Scenario :** We'll stream customer shopping events (`page views`, `add-to-cart`, `purchases`) to Kinesis, then use Redshift to analyze the data in real-time for business insights. To simulate this, we will create a python script to generate `fake` data.
+> **Scenario :** We'll stream customer shopping events (`page views`, `add-to-cart`, `purchases`) to Kinesis, then we will use Redshift to analyze the data in real-time for business insights. To simulate this, we will create a python script to generate `fake` data.
 
 ### Architecture
 
 - Python application publishes e-commerce events to Kinesis Data Stream.
-- Redshift consumes data directly from Kinesis using materialized views.
+- Redshift consumes data directly from Kinesis using `materialized views auto refresh from kinesis data source`.
 - Analytics can be run on this continuously updated data.
 
 > [!WARNING]
@@ -144,4 +144,44 @@ SELECT
 FROM ecommerce.events_realtime
 WHERE event_type = 'purchase'
 AND timestamp > DATEADD(hour, -1, GETDATE());
+```
+
+## Cleanup
+
+**Delete the Redshift Cluster**
+
+```bash
+>>> aws redshift delete-cluster \
+    --cluster-identifier ecommerce-analytics \
+    --skip-final-cluster-snapshot
+```
+
+**Delete the Kinesis Data Stream**
+
+```bash
+>>> aws kinesis delete-stream --stream-name ecommerce-events
+```
+
+**Detach policy from role**
+
+```bash
+>>> aws iam detach-role-policy \
+    --role-name RedshiftKinesisRole \
+    --policy-arn arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess
+```
+
+**Delete the role**
+
+```bash
+>>> aws iam delete-role --role-name RedshiftKinesisRole
+```
+
+**Delete the s3 bucket**
+
+```bash
+>>> aws s3 rm s3://hack-with-harsha/ --recursive
+```
+
+```bash
+>>> aws s3 rb s3://hack-with-harsha --force
 ```
